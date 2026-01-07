@@ -1,173 +1,163 @@
-/* --- CORE CSS STYLING --- */
-:root {
-    --primary-color: #004c97; 
-    --secondary-color: #ffd700; 
-    --text-color: #34495e; 
-    --success-color: #27ae60;
-    --danger-color: #e74c3c;
-    --bg-light: #f5f7fa;
-    --info-color: #3498db; /* Added for info/copy buttons */
-}
-
+/* ------------------ General ------------------ */
 body { 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    background: var(--bg-light); 
-    margin: 0; 
-    padding: 0; 
-    color: var(--text-color);
+    font-family:"Segoe UI",Arial,sans-serif; 
+    background:#e6f0ff; 
+    margin:0; 
+    padding:0; 
+    color:#1a1a1a; 
 }
+h1,h2,h3 { margin:0 0 10px 0; } 
+p { margin:5px 0 10px 0; }
 
+/* ------------------ Header ------------------ */
 header { 
-    background: var(--primary-color); 
-    color: #fff; 
-    padding: 1.5rem 1rem; 
-    text-align: center; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    margin-bottom: 20px;
+    background: linear-gradient(90deg, #003366, #0056b3); 
+    color:white; 
+    padding:25px 20px; 
+    text-align:center; 
+    box-shadow:0 4px 8px rgba(0,0,0,0.2); 
+    border-bottom:4px solid #28a745; 
+    border-radius:0 0 12px 12px;
 }
- 
-header h1 {
-    margin: 0;
-    font-size: 1.8em;
+header h1{ font-size:2.2em; margin-bottom:8px; } 
+header p{ font-size:1.05em; opacity:0.9; }
+
+/* ------------------ Navigation ------------------ */
+nav { 
+    background:#fff; 
+    padding:12px; 
+    display:flex; 
+    justify-content:center; 
+    gap:12px; 
+    border-bottom:2px solid #003366; 
+    flex-wrap:wrap; 
+    box-shadow:0 2px 4px rgba(0,0,0,0.1);
+}
+nav button { 
+    background:#0056b3; 
+    color:white; 
+    border:none; 
+    padding:12px 18px; 
+    cursor:pointer; 
+    border-radius:8px; 
+    font-size:0.95em; 
+    transition:0.3s; 
+}
+nav button:hover { 
+    background:#003f88; 
+    transform: translateY(-2px); 
 }
 
-.container { 
-    max-width: 1000px; 
-    margin: 30px auto; 
-    padding: 25px; 
-    background: #fff; 
-    border-radius: 12px; 
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+/* ------------------ Sections ------------------ */
+section { display:none; padding:25px; }
+section.active { display:block; }
+
+/* ------------------ Cards ------------------ */
+.card { 
+    background:#fff; 
+    padding:25px; 
+    margin-bottom:20px; 
+    border-radius:12px; 
+    box-shadow:0 4px 12px rgba(0,0,0,0.1); 
+    border-left:6px solid #003366; 
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover { 
+    transform: translateY(-3px); 
+    box-shadow:0 6px 18px rgba(0,0,0,0.15); 
 }
 
-h2 { 
-    color: var(--primary-color); 
-    border-bottom: 2px solid var(--secondary-color);
-    padding-bottom: 10px;
-    margin-top: 0;
-    display: flex;
-    align-items: center;
+/* ------------------ Forms ------------------ */
+select,input[type="text"],input[type="number"],textarea { 
+    width:100%; 
+    padding:10px; 
+    margin-top:8px; 
+    margin-bottom:12px; 
+    border:1px solid #ccc; 
+    border-radius:8px; 
+    font-size:0.95em; 
+    box-sizing:border-box; 
+    transition:0.2s;
 }
- 
-h2 i {
-    margin-right: 10px;
-    color: var(--secondary-color);
+select:focus,input:focus,textarea:focus { border-color:#003366; outline:none; }
+
+/* ------------------ Buttons ------------------ */
+button.primary { 
+    background:#28a745; 
+    color:white; 
+    border:none; 
+    padding:14px; 
+    cursor:pointer; 
+    border-radius:8px; 
+    font-size:1em; 
+    font-weight:bold; 
+    transition:0.3s; 
+}
+button.primary:hover { 
+    background:#218838; 
+    transform: translateY(-2px); 
 }
 
-button { 
-    background: var(--primary-color); 
-    color: #fff; 
-    border: none; 
-    padding: 10px 15px; 
-    border-radius: 6px; 
-    cursor: pointer; 
-    margin: 5px 2px; 
-    transition: background 0.3s, transform 0.1s;
+/* ------------------ Tables ------------------ */
+table { 
+    width:100%; 
+    border-collapse:collapse; 
+    margin-bottom:20px; 
+    border-radius:8px; 
+    overflow:hidden; 
 }
- 
-button:hover { 
-    background: #0060b0; 
-    transform: translateY(-1px);
+table th { 
+    background:#003366; 
+    color:white; 
+    padding:12px; 
+    text-align:left; 
 }
-
-/* Copy Link Button Specific Styling */
-.copy-link-btn {
-    padding: 5px 10px !important; 
-    font-size: 0.8em !important; 
-    margin-top: 5px !important; 
-    background-color: var(--info-color) !important;
-    display: inline-block;
+table td { 
+    border-bottom:1px solid #ccc; 
+    padding:12px; 
+    background:#f9f9f9; 
 }
-.copy-link-btn:hover { 
-    background-color: #2980b9 !important;
-}
- 
-/* Dashboard Styles */
-#dashboard-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    font-size: 0.9em;
-}
-#dashboard-table th, #dashboard-table td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
-}
-#dashboard-table th {
-    background-color: var(--primary-color);
-    color: white;
-    font-weight: bold;
-}
-/* Reading Level Styling */
-.level-frustration { background-color: #f8d7da; color: #721c24; }
-.level-instructional { background-color: #fff3cd; color: #856404; }
-.level-independent, .level-gradeready { background-color: #d4edda; color: #155724; }
- 
-.hidden { display: none; }
-
-/* Dashboard Summary Grid */
-#summary-metrics {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    padding: 15px;
-    background: #e0f7fa;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #b2ebf2;
-    font-weight: bold;
-}
-#summary-metrics > div {
-    margin: 5px 10px;
-    text-align: center;
-}
-.alert-info {
-    padding: 15px;
-    margin-top: 15px;
-    border-radius: 4px;
-    background-color: #e9f7ff; 
-    border: 1px solid #c7e9ff; 
-    color: #007bff;
+table tr:hover td { 
+    background:#e6f0ff; 
 }
 
-/* Generated Link Input Styling */
-.class-link-group {
-    margin-bottom: 15px; 
-    border-bottom: 1px dashed #ccc; 
-    padding-bottom: 10px;
+/* ------------------ Progress Bars ------------------ */
+.progress-container { 
+    background:#d9d9d9; 
+    border-radius:12px; 
+    overflow:hidden; 
+    margin-bottom:15px; 
 }
-.class-link-input {
-    width: 100%; 
-    padding: 8px; 
-    border: 1px solid #bdc3c7; 
-    border-radius: 4px; 
-    margin-top: 5px; 
-    cursor: pointer;
-    background-color: #fff; /* Ensure it's white */
-    color: var(--text-color);
+.progress-bar { 
+    height:20px; 
+    border-radius:12px; 
+    background:#28a745; 
+    width:0; 
+    color:white; 
+    text-align:center; 
+    line-height:20px; 
+    font-size:0.9em; 
+    transition:width 1s ease-in-out; 
 }
- 
-/* --- PRINT STYLES --- */
-@media print {
-    header, 
-    .alert-info, 
-    #teacherDashboardView button,
-    #teacherDashboardView input,
-    #teacherDashboardView h3:nth-of-type(1),
-    #teacherDashboardView h3:nth-of-type(2),
-    #importStatus,
-    #classLinkOutput {
-        display: none !important;
-    }
-    .container {
-        box-shadow: none; 
-        border: none; 
-        margin: 0;
-        padding: 0;
-    }
-    body {
-        background: #fff; 
-        color: #000;
-    }
+
+/* ------------------ Footer ------------------ */
+footer { 
+    background:#003366; 
+    color:white; 
+    text-align:center; 
+    padding:20px; 
+    font-size:0.95em; 
+    margin-top:20px; 
+    box-shadow:0 -3px 8px rgba(0,0,0,0.15); 
+    border-top:4px solid #28a745; 
+    border-radius:12px 12px 0 0;
+}
+
+/* ------------------ Responsive ------------------ */
+@media(max-width:768px){
+    nav { flex-direction:column; }
+    nav button { width:100%; margin-bottom:5px; } 
+    table th, table td { font-size:0.9em; padding:8px; } 
+    .progress-container { height:18px; } 
+    .progress-bar { height:18px; line-height:18px; font-size:0.85em; }
 }

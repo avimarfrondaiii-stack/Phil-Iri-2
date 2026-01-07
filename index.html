@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phil-IRI JHS Assessment System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* ====================================
+           I. CORE CSS STYLING & UTILITIES
+           ==================================== */
+        :root {
+            --primary-color: #004c97; /* Deep Blue (DepEd Color) */
+            --secondary-color: #ffd700; /* Gold/Yellow */
+            --text-color: #34495e; /* Dark Slate */
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --bg-light: #f5f7fa;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg-light); 
+            margin: 0; 
+            padding: 0; 
+            color: var(--text-color); 
+        }
+        
+        header { 
+            background: var(--primary-color); 
+            color: #fff; 
+            padding: 1.5rem 1rem; 
+            text-align: center; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+            margin-bottom: 20px; 
+        }
+        header h1 { margin: 0; font-size: 1.8em; }
+        
+        .container { 
+            max-width: 1000px; 
+            margin: 30px auto; 
+            padding: 25px; 
+            background: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); 
+        }
+        
+        h2 { 
+            color: var(--primary-color); 
+            border-bottom: 2px solid var(--secondary-color); 
+            padding-bottom: 10px; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+        }
+        h2 i { margin-right: 10px; color: var(--secondary-color); }
+        
+        button { 
+            background: var(--primary-color); 
+            color: #fff; 
+            border: none; 
+            padding: 10px 15px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            margin: 5px 2px; 
+            transition: background 0.3s, transform 0.1s; 
+        }
+        button:hover { background: #0060b0; transform: translateY(-1px); }
+        
+        input, select, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 5px 0 15px; 
+            border-radius: 6px; 
+            border: 1px solid #ccc; 
+            box-sizing: border-box; 
+        }
+        
+        .card { 
+            background: #ecf0f1; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+            border-left: 5px solid var(--secondary-color); 
+        }
+        
+        .hidden { display: none; }
+        
+        /* Alert Styles */
+        .alert-info { 
+            padding: 15px; 
+            margin-top: 15px; 
+            border-radius: 4px; 
+            background-color: #e9f7ff; 
+            border: 1px solid #c7e9ff; 
+            color: #007bff; 
+        }
+        
+        /* Timer Style */
+        #timerDisplay {
+            font-size: 3em;
+            font-weight: bold;
+            color: var(--danger-color);
+            text-align: center;
+            border: 3px solid var(--danger-color);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: #fff;
+        }
+
+        /* Question List Styling */
+        .gst-question-list { list-style-type: none; padding: 0; }
+        .gst-question-list li { margin-bottom: 20px; padding: 10px; border-bottom: 1px solid #ddd; }
+        .gst-question-list label { display: block; margin-left: 15px; font-weight: normal; cursor: pointer; }
+        
+        /* ====================================
+           II. TEACHER DASHBOARD STYLING
+           ==================================== */
+        #dashboard-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; }
+        #dashboard-table th, #dashboard-table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        #dashboard-table th { background-color: var(--primary-color); color: white; font-weight: bold; }
+        
+        .result-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .result-table th, .result-table td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        .study-plan-table th, .study-plan-table td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
+        .study-plan-table th { background-color: #e9f7ff; }
+
+        /* Reading Level Classes */
+        .level-frustration { background-color: #f8d7da; color: #721c24; font-weight: bold; }
+        .level-instructional { background-color: #fff3cd; color: #856404; font-weight: bold; }
+        .level-independent, .level-gradeready, .level-gradeready-note { background-color: #d4edda; color: #155724; font-weight: bold; }
+        
+        /* Summary Grid */
+        #summary-metrics { 
+            display: flex; 
+            justify-content: space-around; 
+            flex-wrap: wrap; 
+            padding: 15px; 
+            background: #e0f7fa; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            border: 1px solid #b2ebf2; 
+            font-weight: bold; 
+        }
+        #summary-metrics > div { margin: 5px 10px; text-align: center; }
+
+        /* Print Styles */
+        @media print {
+            body { background: #fff; margin: 0; padding: 0; }
+            header, .container, #dashboard-table { box-shadow: none !important; border: none !important; }
+            button, .hidden, .alert-info, #debugPasscodes { display: none !important; }
+            .card { border: 1px solid #ccc; padding: 15px; page-break-inside: avoid; }
+            h2, h3 { color: #000 !important; }
+            .study-plan-table { width: 100%; font-size: 10pt; }
+            #step5 { display: block !important; } /* Ensure the summary is visible */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 id="mainHeader">Phil-IRI JHS Assessment System</h1>
+    <p id="subHeader">Loading Role-Based View...</p>
+</header>
+
+<div class="container">
+    
+    <div id="teacherDashboardView" class="hidden">
+        <h2><i class="fas fa-desktop"></i> Teacher Mainframe Dashboard</h2>
+        <p class="alert-info">
+            This dashboard summarizes the results of all completed learner assessments. (Data is stored locally in this browser.)
+        </p>
+        
+        <div id="summary-metrics"></div>
+
+        <h3>Individual Learner Progress</h3>
+        <table id="dashboard-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Grade</th>
+                    <th>GST (0-40)</th>
+                    <th>Writing (0-40)</th>
+                    <th>Final Reading Level</th>
+                    <th>WPM</th>
+                    <th>Passage Level</th>
+                    <th>Priority Gap</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+        <p id="no-data-message" style="text-align: center; color: var(--danger-color); margin-top: 30px;">No learners have been assessed yet.</p>
+        <button onclick="clearAllData()" style="background-color: var(--danger-color); margin-top: 20px;">Clear All Stored Learner Data</button>
+    </div>
+
+    <div id="learnerAssessmentView" class="hidden">
+        
+        <div id="loginScreen" class="card">
+            <h2><i class="fas fa-lock"></i> Learner Access Required</h2>
+            <p>Please enter the unique passcode provided by your teacher (e.g., **2026-001**) to begin the assessment.</p>
+            <label for="learnerPasscode">Student Passcode:</label>
+            <input type="text" id="learnerPasscode" placeholder="Enter your 8-character passcode (e.g., 2026-001)" required>
+            <button onclick="learnerLogin()" style="width:100%;">Access Assessment</button>
+            <div id="debugPasscodes" class="alert-info" style="font-size: 0.8em; margin-top: 15px;">
+                <strong>DEBUG:</strong> Use a code from **2026-001** up to **2026-081** for testing. E.g., <span id="samplePasscode">2026-001</span>
+            </div>
+        </div>
+
+        <div id="studentInfoScreen" class="card hidden">
+            <h2><i class="fas fa-user-edit"></i> Step 0A: Learner Information Setup</h2>
+            <p class="alert-info">Please enter your complete name and select your current grade level.</p>
+            
+            <label for="studentNameInput">Learner Name:</label>
+            <input type="text" id="studentNameInput" placeholder="Enter full name" required>
+            
+            <label for="studentGradeInput">Current Grade Level:</label>
+            <select id="studentGradeInput" required>
+                <option value="">-- Select Grade Level --</option>
+                <option value="7">Grade 7</option>
+                <option value="8">Grade 8</option>
+                <option value="9">Grade 9</option>
+                <option value="10">Grade 10</option>
+            </select>
+            
+            <button onclick="submitStudentInfo()" style="width:100%; background:var(--primary-color);">Proceed to Group Screening Test (GST)</button>
+        </div>
+
+        <div id="step0" class="card hidden">
+            <h2><i class="fas fa-user"></i> Step 0B: Group Screening Test (GST)</h2>
+            <p><strong>Learner:</strong> <span id="displayStudentName"></span> | <strong>Grade:</strong> <span id="displayStudentGrade"></span></p>
+            
+            <h3 style="color:var(--danger-color); margin-top: 20px;">Group Screening Test (GST) - 40 Items</h3>
+            <p>The GST has 40 multiple-choice items. Passing score: **28/40**.</p>
+            
+            <ol id="gstQuestionsContainer" class="gst-question-list"></ol>
+            
+            <button onclick="submitGST()" style="width:100%; background:var(--danger-color);">Submit Screening Test & Analyze</button>
+        </div>
+
+        <div id="step1" class="card hidden">
+            <h2><i class="fas fa-chart-bar"></i> Step 1: GST Analysis (Raw Score)</h2>
+            <div id="gstResultOutput"></div>
+            <button onclick="loadOralAssessment()" id="proceedToOralBtn" style="width:100%; margin-top: 20px;"></button>
+        </div>
+
+        <div id="step2" class="card hidden">
+            <h2><i class="fas fa-microphone"></i> Stage 2: Individualized Assessment (Oral Reading)</h2>
+            <p><strong>Starting Passage:</strong> <span id="passageGradeDisplay">--</span> | <span id="wordCountDisplay">--</span></p>
+            <p id="oralInstructionNote" class="alert-info">The teacher/proctor should start the timer and observe the learner reading the passage aloud.</p>
+            <p id="oralPassage" style="border: 1px solid #ddd; padding: 15px; background: #fff; max-height: 200px; overflow-y: auto;">Passage text will appear here.</p>
+            
+            <button onclick="startReading()" id="startReadingBtn" style="background:var(--success-color); margin-bottom: 15px;">Display Passage & Start Assessment</button>
+            
+            <div id="readingTimerSection" class="hidden">
+                <h3><i class="fas fa-stopwatch"></i> Oral Reading Timer (<span id="timerDuration">300</span> Seconds)</h3>
+                <div id="timerDisplay">300</div>
+                <button id="startButton" onclick="startReadingTimer()" style="width: 48%; background: var(--success-color);">Start Timer</button>
+                <button id="stopButton" onclick="stopReadingTimer()" style="width: 48%; background: var(--danger-color);" disabled>Stop Timer</button>
+                <p class="alert-info" style="margin-top: 15px;">Press STOP immediately when the learner finishes reading the passage.</p>
+            </div>
+            
+            <div id="fluencyCheck" class="hidden">
+                <h3><i class="fas fa-clock"></i> Step 2A: Reading Fluency (WPM)</h3>
+                <label for="readingTime">Actual Reading Time (in seconds, based on stopped timer):</label>
+                <input type="number" id="readingTime" min="1" placeholder="e.g., 300 seconds" required disabled>
+                <button onclick="calculateFluency()" style="width:100%; background:var(--warning-color);" id="calculateFluencyBtn">Calculate WPM & Proceed to Accuracy</button>
+                <p id="wpmResult" style="margin-top: 10px; font-weight: bold;"></p>
+            </div>
+
+            <div id="accuracyCheck" class="hidden" style="margin-top: 20px;">
+                <h3><i class="fas fa-edit"></i> Step 2B: Reading Accuracy (Errors)</h3>
+                <p>Record the **number of errors** (excluding Self-Corrections) below.</p>
+                <div id="errorInputs" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;"></div>
+                <button onclick="submitOralErrors()" style="width:100%; margin-top:15px; background:var(--success-color);">Compute Word Recognition & Proceed</button>
+            </div>
+        </div>
+
+        <div id="step3" class="card hidden">
+            <h2><i class="fas fa-question-circle"></i> Step 3: Reading Comprehension (10 Items)</h2>
+            <p>Answer the following **10-item Multiple Choice Questions** based on the passage read.</p>
+            <ol id="comprehensionQuestions"></ol>
+            <button onclick="submitComprehension()" style="background:var(--success-color);">Compute Comprehension Score & Determine Final Level</button>
+        </div>
+        
+        <div id="step4" class="card hidden">
+            <h2><i class="fas fa-pencil-alt"></i> Stage 4: Writing Skills Assessment (40 Items)</h2>
+            <p>This 40-item test assesses **Enabling Writing Skills**. Passing score: **28/40**.</p>
+
+            <ol id="writingQuestionsContainer" class="gst-question-list"></ol>
+
+            <button onclick="submitWritingAssessment()" style="width:100%; background:var(--primary-color);">Submit Writing Assessment & Finish</button>
+        </div>
+
+        <div id="step5" class="card hidden">
+            <h2><i class="fas fa-chart-line"></i> Assessment Summary & Completion</h2>
+            <p class="alert-info">Assessment successfully completed! Your results have been recorded by your teacher.</p>
+            
+            <table class="result-table" style="margin-bottom: 20px;">
+                <thead>
+                    <tr>
+                        <th colspan="2" style="text-align: center;">Learner Profile</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>**Learner Name**</td><td id="finalLearnerName">--</td></tr>
+                    <tr><td>**Passcode**</td><td id="finalLearnerPasscode">--</td></tr>
+                    <tr><td>**Current Grade**</td><td id="finalLearnerGrade">--</td></tr>
+                    <tr><td>**Date Assessed**</td><td id="finalDate">--</td></tr>
+                </tbody>
+            </table>
+
+            <div id="finalLevel" class="card">
+                <h3>Final Phil-IRI Reading Level Determination</h3>
+                <p>Formula: $Level = \text{Lower of (Word Recognition Level or Comprehension Level)}$</p>
+                <p>Final Reading Level (G<span id="passageLevelDisplay">--</span>): <strong id="finalReadingLevelDisplay">--</strong></p>
+                <p>Priority Skill Gap: <strong id="skillGapDisplay">--</strong></p>
+                <p>Writing Skills Result: <strong id="writingScoreDisplay">--</strong></p>
+                <p style="font-size: 0.9em; margin-top: 10px;">
+                    Word Recognition Score: <strong id="wrPercentageDisplay">--</strong> | Comprehension Score: <strong id="compPercentageDisplay">--</strong>
+                </p>
+            </div>
+            
+            <div id="detailedErrorResult" class="card hidden">
+                <h3><i class="fas fa-exclamation-triangle"></i> Oral Reading Error Analysis</h3>
+                <p>Total Words Read: <strong id="totalWordsReadDisplay">0</strong> | Total Errors (WR Score): <strong id="totalErrorCountDisplay">0</strong></p>
+                <table class="result-table">
+                    <thead>
+                        <tr>
+                            <th>Error Type</th>
+                            <th>Count</th>
+                            <th>Percentage of Total Errors (Excluding SC)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="errorAnalysisTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="studyPlan" class="card">
+                <h3><i class="fas fa-book-reader"></i> Suggested 4-Week Intervention Plan (Daily)</h3>
+                <p>This plan is tailored to address the **Priority Skill Gap** identified above.</p>
+                <div id="studyPlanContent"></div>
+            </div>
+            
+            <button onclick="window.print()" style="width:32%; background:var(--success-color); margin-top: 20px;"><i class="fas fa-print"></i> Print Results (Save PDF)</button>
+            <button onclick="downloadResults()" style="width:32%; background:var(--primary-color); margin-top: 20px;"><i class="fas fa-download"></i> Download Results (TXT)</button>
+            <button onclick="window.location.reload();" style="width:32%; background:var(--text-color); margin-top: 20px;">Start New Assessment</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // ====================================
+    // V. JAVASCRIPT LOGIC AND DATA
+    // ====================================
+
+    // --- GLOBAL CONFIGURATION ---
+    const TEACHER_SECRET_KEY = 'teacher123'; 
+    const GST_PASS_THRESHOLD = 28;    
+    const WRITING_PASS_THRESHOLD = 28;
+    const LOCAL_STORAGE_KEY = 'philiriJHSData'; 
+    const ORAL_READING_DURATION = 300; // 5 minutes (300 seconds)
+
+    // --- STUDENT PASSCODES (81 unique codes, 2026-001 to 2026-081) ---
+    const STUDENT_PASSCODES = [
+        "2026-001", "2026-002", "2026-003", "2026-004", "2026-005", 
+        "2026-006", "2026-007", "2026-008", "2026-009", "2026-010",
+        "2026-011", "2026-012", "2026-013", "2026-014", "2026-015",
+        "2026-016", "2026-017", "2026-018", "2026-019", "2026-020",
+        "2026-021", "2026-022", "2026-023", "2026-024", "2026-025",
+        "2026-026", "2026-027", "2026-028", "2026-029", "2026-030",
+        "2026-031", "2026-032", "2026-033", "2026-034", "2026-035",
+        "2026-036", "2026-037", "2026-038", "2026-039", "2026-040",
+        "2026-041", "2026-042", "2026-043", "2026-044", "2026-045",
+        "2026-046", "2026-047", "2026-048", "2026-049", "2026-050",
+        "2026-051", "2026-052", "2026-053", "2026-054", "2026-055",
+        "2026-056", "2026-057", "2026-058", "2026-059", "2026-060",
+        "2026-061", "2026-062", "2026-063", "2026-064", "2026-065",
+        "2026-066", "2026-067", "2026-068", "2026-069", "2026-070",
+        "2026-071", "2026-072", "2026-073", "2026-074", "2026-075",
+        "2026-076", "2026-077", "2026-078", "2026-079", "2026-080",
+        "2026-081"
+    ];
+
+    // --- PHIL-IRI STANDARDS ---
+    const PHIL_IRI_LEVELS = {
+        Independent: { wrMin: 97, compMin: 80, className: 'level-independent' },
+        Instructional: { wrMin: 90, compMin: 59, className: 'level-instructional' },
+        Frustration: { wrMax: 89, compMax: 58, className: 'level-frustration' }
+    };
+    const errorTypes = ["Mispronunciation", "Omission", "Reversal", "Hesitation (>3s)", "Substitution", "Insertion", "Repetition", "Self-Corrections"];
+    
+    // --- DATA STATE ---
+    let studentsData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+    let currentLearnerData = {};
+    let currentErrors = {};
+    let totalWords = 0;
+    let passageGrade = '';
+
+    // --- TIMER STATE ---
+    let timerInterval;
+    let timeLeft;
+    let timeTaken = 0;
+
+    // --- ASSESSMENT QUESTIONS (Updated to 40 unique questions for GST and Writing) ---
+
+    // ===========================================
+    // GST - 40 UNIQUE ITEMS (Reading Comprehension & Language)
+    // ===========================================
+    const gstQuestions = [
+        // READING COMPREHENSION (Inference, Main Idea, Text Structure)
+        { question: "Which describes the main idea of a text on OFW remittances?", correct: "B", choices: ["A. OFW jobs are high paying.", "B. Remittances significantly bolster the economy but create social challenges.", "C. Filipinos work abroad due to lack of local jobs.", "D. All OFWs return home after one year."] },
+        { question: "To find the **implied purpose** of a persuasive essay, readers must:", correct: "B", choices: ["A. Count the number of sentences.", "B. Infer the author's intention and point of view from evidence.", "C. Only look at the title of the essay.", "D. Read the essay backward."] },
+        { question: "Which organizational pattern is appropriate for comparing and contrasting different types of Philippine festivals?", correct: "D", choices: ["A. Chronological order", "B. Cause and effect", "C. Problem and solution", "D. Comparison and Contrast"] },
+        { question: "What is the common **theme** in post-colonial Filipino novels like *Noli Me Tangere*?", correct: "A", choices: ["A. Social injustice and resistance to oppression", "B. The joy of modern urban life", "C. Instructions for farming rice", "D. The best recipe for adobo"] },
+        { question: "Which statement is an **opinion**?", correct: "A", choices: ["A. The *sinigang* is undoubtedly the best Filipino soup dish.", "B. Manila is the capital city of the Philippines.", "C. The sun rises in the east.", "D. Mount Apo is the highest mountain."] },
+        { question: "The author used **hyperbole** in the sentence: 'I waited for an eternity.' What literary device is this?", correct: "C", choices: ["A. Simile", "B. Metaphor", "C. Hyperbole (Exaggeration)", "D. Irony"] },
+        { question: "A text describing the steps of making *adobo* uses which text structure?", correct: "C", choices: ["A. Cause and Effect", "B. Definition", "C. Sequence/Process", "D. Description"] },
+        { question: "In a text discussing climate change, the final paragraph suggesting solutions serves the purpose of:", correct: "B", choices: ["A. Narrating a story", "B. Persuading the reader to act", "C. Defining a term", "D. Listing details"] },
+        { question: "If a character says, 'What lovely weather,' while walking through a typhoon, this is an example of:", correct: "D", choices: ["A. Analogy", "B. Personification", "C. Allegory", "D. Verbal Irony"] },
+        { question: "What should be the main topic sentence of a paragraph listing the benefits of local tourism?", correct: "A", choices: ["A. Local tourism has a multifaceted positive impact on community development.", "B. Beaches are nice places to visit.", "C. Many hotels are expensive.", "D. Tourists like taking photos of food."] },
+
+        // VOCABULARY & CONTEXT CLUES
+        { question: "In 'The politician *mitigated* the criticism...', what does 'mitigated' mean?", correct: "C", choices: ["A. Increased or worsened", "B. Ignored completely", "C. Made less severe or minimized", "D. Confirmed the truth of"] },
+        { question: "The word '*indispensable*' means:", correct: "D", choices: ["A. Easily disposable or useless", "B. Optional or unnecessary", "C. Very expensive to buy", "D. Absolutely necessary or essential"] },
+        { question: "The judge's **verdict** was final. The synonym for **verdict** is:", correct: "A", choices: ["A. Judgment or decision", "B. Question", "C. Complaint", "D. Evidence"] },
+        { question: "Use context clues to find the meaning of **ubiquitous**: 'Jeepneys are **ubiquitous** in the urban areas of the Philippines.'", correct: "C", choices: ["A. Rare and difficult to find", "B. Old-fashioned", "C. Present everywhere or very common", "D. Illegal to drive"] },
+        { question: "The phrase 'Don't put all your eggs in one basket' is an example of which literary device?", correct: "B", choices: ["A. Hyperbole", "B. Idiom", "C. Alliteration", "D. Metaphor"] },
+        { question: "The word **disseminate** means to:", correct: "D", choices: ["A. Gather together", "B. Hide or conceal", "C. Destroy quickly", "D. Spread or scatter (information) widely"] },
+        { question: "The word **lament** most nearly means:", correct: "B", choices: ["A. Celebrate with joy", "B. Express passionate grief or sorrow", "C. Speak softly", "D. Think deeply"] },
+        { question: "What is the antonym for **ephemeral**?", correct: "C", choices: ["A. Fast", "B. Short-lived", "C. Permanent or lasting", "D. Transparent"] },
+        { question: "The word **arduous** implies something is:", correct: "A", choices: ["A. Difficult and requiring great effort", "B. Easy and simple", "C. Beautiful and pleasant", "D. Quick and sudden"] },
+        { question: "Based on context, **ambivalent** means: 'He felt **ambivalent** about the new policy—he liked some parts but disagreed with others.'", correct: "C", choices: ["A. Strongly supportive", "B. Completely against", "C. Having mixed feelings or contradictory ideas", "D. Indifferent"] },
+
+        // GRAMMAR & USAGE (SVA, Pronouns, Modifiers)
+        { question: "Complete the sentence: 'Neither the students nor the teacher ______ ready for the quiz.'", correct: "A", choices: ["A. was", "B. were", "C. are", "D. is"] },
+        { question: "Identify the main function of the conjunction in: 'The team practiced diligently, **yet** they still lost.'", correct: "C", choices: ["A. To show cause", "B. To show time", "C. To show contrast", "D. To show addition"] },
+        { question: "Choose the correct sentence: (Subject-Verb Agreement)", correct: "C", choices: ["A. The results of the experiment is clear.", "B. Everybody have finished their task.", "C. The committee agrees on the new plan.", "D. Several of the dishes was spicy."] },
+        { question: "Identify the correct pronoun: 'The prize was shared between Marco and ______.'", correct: "B", choices: ["A. I", "B. me", "C. myself", "D. mine"] },
+        { question: "Which sentence contains a **misplaced modifier**?", correct: "A", choices: ["A. The boy ate the pizza sitting on the chair.", "B. Sitting on the chair, the boy ate the pizza.", "C. The boy, sitting on the chair, ate the pizza.", "D. The pizza was eaten by the boy sitting on the chair."] },
+        { question: "What is the function of the italicized word in: 'She sings *beautifully*.'", correct: "B", choices: ["A. Adjective", "B. Adverb (Modifies the verb 'sings')", "C. Noun", "D. Preposition"] },
+        { question: "Identify the type of clause: '...**because it rained all night**.'", correct: "D", choices: ["A. Independent Clause", "B. Noun Clause", "C. Relative Clause", "D. Subordinate/Adverbial Clause"] },
+        { question: "Which sentence uses the correct verb tense (Present Perfect)?", correct: "C", choices: ["A. She went to the market yesterday.", "B. She is going to the market tomorrow.", "C. She has gone to the market already.", "D. She will go to the market later."] },
+        { question: "Which sentence is written in the **Passive Voice**?", correct: "B", choices: ["A. The students completed the work.", "B. The work was completed by the students.", "C. The students will complete the work.", "D. The students are completing the work."] },
+        { question: "Correct the pronoun error: 'Everyone should bring **their** own umbrella.'", correct: "A", choices: ["A. Everyone should bring his or her own umbrella.", "B. Everyone should bring they own umbrella.", "C. Everyone should bring our own umbrella.", "D. Everyone should bring the umbrellas."] },
+
+        // SYNTAX & SENTENCE STRUCTURE (Coherence, Parallelism, Clarity)
+        { question: "Which sentence demonstrates **parallel structure**?", correct: "D", choices: ["A. The job requires working, listening, and to write reports.", "B. He likes running, swimming, and to cycle.", "C. She is smart, beautiful, and she is kind.", "D. She is smart, beautiful, and kind."] },
+        { question: "To combine 'She is tired' and 'She worked late' effectively, use the transition:", correct: "B", choices: ["A. as well as", "B. because", "C. but", "D. yet"] },
+        { question: "Which phrase is written most **concisely**?", correct: "C", choices: ["A. Due to the fact that", "B. In the eventuality of", "C. Because", "D. At this point in time"] },
+        { question: "Which is a **simple sentence**?", correct: "A", choices: ["A. The children played happily in the park.", "B. The children played, and the parents watched.", "C. Although it was cold, the children played.", "D. The children played while the parents watched, and they were happy."] },
+        { question: "Identify the sentence that lacks **coherence** (logical flow).", correct: "B", choices: ["A. The volcano erupted. Ash covered the town.", "B. Ash covered the town, which is why the volcano erupted.", "C. Because the volcano erupted, ash covered the town.", "D. The volcano erupted; consequently, ash covered the town."] },
+        { question: "The best place for the phrase 'for the test' in 'She studied hard **for the test**' is:", correct: "A", choices: ["A. At the end of the sentence (correct as is).", "B. After 'She'.", "C. After 'studied'.", "D. Before 'She'. (Changing the meaning)"] },
+        { question: "Which sentence is correct (Avoids Dangling Participle)?", correct: "D", choices: ["A. Walking down the street, the building appeared huge.", "B. Having read the book, the film was understood.", "C. While sleeping, the alarm rang loudly.", "D. While I was sleeping, the alarm rang loudly."] },
+        { question: "To achieve **variety** in sentence structure, a writer should:", correct: "A", choices: ["A. Use a mix of simple, compound, and complex sentences.", "B. Only use short, choppy sentences.", "C. Only use very long, complicated sentences.", "D. Start every sentence with 'The'."] },
+        { question: "Which transition shows **spatial order** (location)?", correct: "C", choices: ["A. In addition", "B. Furthermore", "C. Above the shelf", "D. Consequently"] },
+        { question: "The use of 'I' and 'we' should generally be avoided in which type of writing?", correct: "B", choices: ["A. Personal narrative", "B. Formal academic essay", "C. Friendly email", "D. Journal entry"] }
+    ];
+
+    // ===========================================
+    // WRITING SKILLS - 40 UNIQUE ITEMS (Mechanics, Conventions, Usage)
+    // ===========================================
+    const writingQuestions = [
+        // PUNCTUATION (Commas, Semicolons, Colons, Apostrophes)
+        { question: "Identify the correct punctuation for: 'The sun set it was beautiful'", correct: "B", choices: ["A. The sun set: it was beautiful.", "B. The sun set; it was beautiful. (Semicolon for closely related independent clauses)", "C. The sun set, it was beautiful. (Comma splice)", "D. The sun set! it was beautiful."] },
+        { question: "Which uses the comma correctly to separate independent clauses?", correct: "C", choices: ["A. I ran quickly, but I missed the bus.", "B. I ran quickly but, I missed the bus.", "C. I ran quickly, but I missed the bus.", "D. I ran quickly but I missed the bus."] },
+        { question: "Choose the sentence with the correct use of the **apostrophe**.", correct: "D", choices: ["A. The student's grades are excellent (plural students).", "B. The students's grades are excellent.", "C. The students grade's are excellent.", "D. The students' grades are excellent (plural possessive)."] },
+        { question: "What is the correct punctuation for a list of cities and provinces?", correct: "B", choices: ["A. We visited Manila, Cebu, and Davao, City.", "B. We visited Manila, NCR; Cebu, Visayas; and Davao, Mindanao. (Semicolons for complex lists)", "C. We visited Manila; NCR, Cebu; Visayas, and Davao; Mindanao.", "D. We visited Manila NCR, Cebu Visayas, and Davao Mindanao."] },
+        { question: "Correctly punctuate the direct quotation: He asked Did you finish the book", correct: "A", choices: ["A. He asked, \"Did you finish the book?\"", "B. He asked \"Did you finish the book\".", "C. He asked: \"Did you finish the book\".", "D. He asked, \"Did you finish the book\"."] },
+        { question: "Which sentence correctly uses a **colon**?", correct: "A", choices: ["A. She packed three things: a book, a towel, and a snack.", "B. The things she packed were: a book, a towel, and a snack.", "C. She packed: a book, a towel, and a snack.", "D. The reason is: she was late."] },
+        { question: "Which is the correct way to write a parenthetical phrase?", correct: "C", choices: ["A. My teacher - a very kind woman - helped me.", "B. My teacher, a very kind woman, helped me.", "C. My teacher (a very kind woman) helped me.", "D. My teacher; a very kind woman; helped me."] },
+        { question: "Correct the sentence: 'She gave the gift to Maria and **I**.'", correct: "D", choices: ["A. She gave the gift to Maria and my.", "B. She gave the gift to I and Maria.", "C. She gave the gift to Maria and me. (Objective Case)", "D. She gave the gift to Maria and me."] },
+        { question: "What punctuation mark is missing: 'The concert which was held outside ended early.'", correct: "B", choices: ["A. Colon", "B. Commas (for non-essential clause: 'which was held outside')", "C. Semicolon", "D. Question Mark"] },
+        { question: "Which uses the hyphen correctly?", correct: "A", choices: ["A. This is a well-known fact.", "B. This is a very-known fact.", "C. This is a well known-fact.", "D. This is a well, known fact."] },
+
+        // GRAMMAR & USAGE (SVA, Tense, Modifiers, Pronouns)
+        { question: "Which sentence is grammatically correct?", correct: "D", choices: ["A. Everybody have to study hard.", "B. Each of the students were late.", "C. Neither John nor his friends is coming.", "D. Either the teacher or the students are responsible. (Verb agrees with the closer subject: students/are)"] },
+        { question: "Which tense is used: 'They **will have finished** the project by Monday.'", correct: "C", choices: ["A. Future Progressive", "B. Simple Future", "C. Future Perfect", "D. Present Perfect"] },
+        { question: "Identify the correct form of the verb: 'Neither of the boys **(is/are)** responsible.'", correct: "A", choices: ["A. is (Treat 'Neither of' as singular)", "B. are", "C. were", "D. have been"] },
+        { question: "Which is the correct possessive form?", correct: "B", choices: ["A. The book's covers were torn (The cover of the book).", "B. The books' pages were yellowed (The pages of several books).", "C. The bookes' cover was torn.", "D. The book's' cover was torn."] },
+        { question: "Choose the transition word that shows **cause and effect**.", correct: "A", choices: ["A. Consequently", "B. However", "C. Similarly", "D. Meanwhile"] },
+        { question: "Identify the correct sentence structure (Avoids comma splice/fragment).", correct: "B", choices: ["A. The alarm rang, I woke up quickly.", "B. The alarm rang, so I woke up quickly.", "C. The alarm rang; woke up quickly.", "D. I woke up quickly the alarm rang."] },
+        { question: "What is the best way to correct the **dangling participle**: 'Running down the road, the house came into view.'", correct: "A", choices: ["A. Running down the road, I saw the house come into view.", "B. The house came into view running down the road.", "C. The road was running down, the house came into view.", "D. While it was running down the road, the house came into view."] },
+        { question: "What is the function of the italicized word: 'The **fast** train arrived early.'", correct: "B", choices: ["A. Adverb", "B. Adjective (Modifies the noun 'train')", "C. Noun", "D. Conjunction"] },
+        { question: "Complete the conditional sentence: 'If I **(had studied/studied)** harder, I would have passed.'", correct: "A", choices: ["A. had studied (Past Perfect for third conditional)", "B. studied", "C. study", "D. was studying"] },
+        { question: "Identify the correct comparative adjective usage.", correct: "C", choices: ["A. He is more taller than his brother.", "B. He is most tall than his brother.", "C. He is taller than his brother.", "D. He is taller as his brother."] },
+
+        // COHERENCE & CLARITY (Logical Flow, Word Choice, Conciseness)
+        { question: "Which sentence demonstrates **coherence** (logical flow)?", correct: "A", choices: ["A. First, prepare the ingredients. Next, mix them well. Finally, bake the cake.", "B. First, bake the cake. Next, prepare the ingredients. Finally, mix them well.", "C. Bake the cake. Ingredients were prepared. Mix them well.", "D. Mix them well, then bake the cake first."] },
+        { question: "In a formal essay, what is the best replacement for the phrase 'a whole lot of'?", correct: "B", choices: ["A. Many", "B. Numerous (More formal than 'many')", "C. Plenty of", "D. Tons of"] },
+        { question: "Which transition best connects the ideas: 'The power went out. ______ the street lights stopped working.'", correct: "C", choices: ["A. Conversely", "B. However", "C. Consequently (Result/Effect)", "D. In addition"] },
+        { question: "The main purpose of a **topic sentence** is to:", correct: "A", choices: ["A. State the main idea of the paragraph.", "B. Summarize the whole essay.", "C. Provide a concluding thought.", "D. Introduce a new supporting detail."] },
+        { question: "To improve **conciseness**, how should 'In spite of the fact that' be rewritten?", correct: "B", choices: ["A. In the fact that", "B. Although (or Despite)", "C. Because of the fact that", "D. Owing to the fact that"] },
+        { question: "Which sentence uses the most **precise** language?", correct: "A", choices: ["A. The typhoon violently uprooted the enormous trees.", "B. The big wind made the trees fall down.", "C. The trees fell because of the storm thing.", "D. The huge trees were taken up by the weather event."] },
+        { question: "Identify the statement that shows a logical **shift in time**.", correct: "D", choices: ["A. At the same time, she decided to leave.", "B. Similarly, he came home.", "C. In conclusion, the team lost.", "D. Previously, she had visited the city."] },
+        { question: "Which sentence avoids **redundancy**?", correct: "B", choices: ["A. The two identical twins look alike.", "B. The twins look alike.", "C. It is an unexpected surprise.", "D. The reason why is because..."] },
+        { question: "The writer's **tone** is primarily conveyed through:", correct: "C", choices: ["A. The length of the essay", "B. The number of paragraphs", "C. Word choice and phrasing", "D. The color of the ink"] },
+        { question: "To effectively transition between paragraphs, a writer should:", correct: "A", choices: ["A. Repeat a key word or idea from the previous paragraph's conclusion.", "B. Introduce a completely new and unrelated topic.", "C. Use only the transition 'Next'.", "D. Change the font style."] },
+
+        // FORMATTING & CONVENTIONS (Capitalization, Titles, Numbers)
+        { question: "Select the sentence with the correct capitalization.", correct: "A", choices: ["A. We visited the National Museum of the Philippines.", "B. We visited the National museum of the philippines.", "C. We visited the national Museum of the Philippines.", "D. We visited the National Museum of the philippines."] },
+        { question: "Which title is correctly capitalized and formatted?", correct: "C", choices: ["A. Reading 'A day In The Life' (Book Title)", "B. Reading 'A Day in the Life' (Book Title)", "C. Reading *A Day in the Life* (Book Title in italics/underline)", "D. Reading *A Day In The Life*"] },
+        { question: "In formal writing, how should numbers usually be written?", correct: "B", choices: ["A. Always use numerals (e.g., 20).", "B. Spell out numbers that can be written in one or two words (e.g., twenty, one hundred).", "C. Use numerals for numbers under 10.", "D. Spell out all numbers, including 1,000,000."] },
+        { question: "Which uses the correct capitalization for a familial title?", correct: "A", choices: ["A. I spoke to my **Aunt** Maria, but I also spoke to **Aunt**.", "B. I spoke to my **aunt** Maria, but I also spoke to **Aunt**.", "C. I spoke to my **aunt** Maria, but I also spoke to **aunt**.", "D. I spoke to my **Aunt** Maria, but I also spoke to **aunt**."] },
+        { question: "Which is the correct way to use an **ellipsis**?", correct: "B", choices: ["A. 'To be or not to be... that is the question.'", "B. 'To be or not to be... that is the question.' (Four dots if a full sentence follows the omission)", "C. 'To be or not to be . . . that is the question.'", "D. 'To be or not to be...that is the question.'"] },
+        { question: "What part of speech is often over-capitalized by new writers?", correct: "B", choices: ["A. Nouns (except proper nouns)", "B. Common nouns and prepositions", "C. Proper nouns", "D. Verbs"] },
+        { question: "The most common error when capitalizing titles of works is:", correct: "A", choices: ["A. Capitalizing prepositions (e.g., *of*, *in*, *the*).", "B. Not capitalizing the first word.", "C. Capitalizing conjunctions.", "D. Not capitalizing nouns."] },
+        { question: "In a bibliography or reference list, book titles are typically formatted using:", correct: "B", choices: ["A. Quotation marks", "B. Italics or Underline", "C. All caps", "D. Bold text"] },
+        { question: "Which sentence uses the correct abbreviation for a time unit?", correct: "C", choices: ["A. The meeting lasted for 2 hrs.", "B. The meeting lasted for 2 hour.", "C. The meeting lasted for two hours.", "D. The meeting lasted for 2 hours."] },
+        { question: "Which is the correct way to write an address in a formal letter?", correct: "A", choices: ["A. Malaybalay City, Bukidnon, 8700", "B. Malaybalay city, bukidnon, 8700", "C. Malaybalay City Bukidnon 8700", "D. Malaybalay, City, Bukidnon, 8700"] }
+    ];
+
+    // --- ORAL READING PASSAGES (3 passages: Grade 4, 7, 10) ---
+    let passages = {
+        "4": { 
+            text: `The small nipa hut stood beside a green rice field. Inside, a family of four lived happily. They woke up early every morning to the sound of roosters and the smell of fresh coffee brewing. The father, a farmer, would walk out to his field. The children learned the value of hard work and often helped their father plant seedlings during the weekends. Their grandmother always said, "The earth rewards those who care for it." The family worked together to ensure a good harvest. They found peace in their simple life, far from the busy noise of the city. The mother sold the extra vegetables in the nearby market every Saturday. They valued community and always shared their food with their neighbors. (Total Words: 120)`,
+            wordCount: 120, 
+            questions:[
+                {question:"What color was the nipa hut painted? (Literal)", correct:"C", choices:["A. Green","B. Bright yellow","C. Brown (Nipa is brown)","D. White"]},
+                {question:"The word 'brewing' most likely means: (Vocabulary)", correct:"A", choices:["A. Making or steeping (as in coffee)","B. Boiling over","C. Smelling very bad","D. Throwing away"]},
+                {question:"(Inferential) What did the children learn by helping their father? ", correct:"B", choices:["A. That school is easy","B. The value of hard work and patience","C. That they should move to the city","D. How to cook dinner"]},
+                {question:"What did the grandmother say about the earth? (Literal)", correct:"A", choices:["A. The earth rewards those who care for it.","B. The earth is always angry.","C. The earth is the biggest planet.","D. The earth is only for farmers."]},
+                {question:"Who primarily worked in the field? (Literal)", correct:"B", choices:["A. The children","B. The father","C. The mother","D. The grandmother"]},
+                {question:"Where did the mother sell the extra vegetables? (Literal)", correct:"D", choices:["A. Online","B. In the city","C. To the farmer","D. In the nearby market"]},
+                {question:"(Inferential) Why did the family find peace? ", correct:"B", choices:["A. They were rich","B. They had a simple, shared life and work","C. They never worked","D. They traveled often"]},
+                {question:"The sound that woke them up was from: (Literal)", correct:"A", choices:["A. Roosters","B. Cars","C. Alarms","D. Neighbors"]},
+                {question:"What activity did the children do on weekends? (Literal)", correct:"C", choices:["A. Went to the mall","B. Watched TV","C. Helped plant seedlings","D. Studied all day"]},
+                {question:"(Vocabulary) The word 'ensure' means:", correct:"D", choices:["A. Doubt","B. Request","C. Delay","D. Guarantee or make certain"]}
+            ]
+        },
+        "7": { 
+            text: `The Philippines' strategic location within the 'Ring of Fire' contributes to its rich geothermal energy potential. This form of renewable energy harnesses heat from deep inside the earth to generate steam to produce electricity. Unlike fossil fuels, geothermal plants emit significantly lower levels of greenhouse gases, making them crucial for sustainable development. The utilization of this resource enhances energy independence, reducing reliance on volatile global oil markets. Key fields serve as baseload power sources, meaning they run consistently regardless of weather conditions, unlike solar or wind power. This consistency is vital for a developing nation. Geothermal energy has been used in the country since the 1970s. The region of Bicol is particularly known for its geothermal power facilities. The government promotes this sector heavily to meet growing power demands. (Total Words: 165)`,
+            wordCount: 165, 
+            questions:[
+                {question:"What is the primary source of geothermal energy? (Literal)", correct:"A", choices:["A. Heat from deep inside the earth","B. Sunlight","C. Wind currents","D. Flowing water"]},
+                {question:"In which global region is the Philippines strategically located? (Literal)", correct:"C", choices:["A. The Bermuda Triangle","B. The Pacific Ocean Belt","C. The 'Ring of Fire'","D. The Arctic Circle"]},
+                {question:"The word 'volatile' means: (Vocabulary)", correct:"B", choices:["A. Stable and predictable","B. Subject to rapid or unpredictable change","C. Very cheap","D. Very expensive to buy"]},
+                {question:"(Inferential) Why are geothermal plants better than solar or wind as a baseload source?", correct:"A", choices:["A. They can run consistently regardless of weather conditions.","B. They are cheaper to build.","C. They use less water.","D. They are quieter to operate."]},
+                {question:"Geothermal energy is considered what type of energy? (Literal)", correct:"D", choices:["A. Fossil fuel","B. Nuclear","C. Coal","D. Renewable energy"]},
+                {question:"Since when has geothermal energy been used in the country? (Literal)", correct:"A", choices:["A. 1970s","B. 2000s","C. 1950s","D. Last year"]},
+                {question:"The utilization of geothermal resources enhances what? (Literal)", correct:"B", choices:["A. Global warming","B. Energy independence","C. Reliance on oil","D. Power outages"]},
+                {question:"Which gas is emitted at significantly lower levels by geothermal plants? (Literal)", correct:"C", choices:["A. Oxygen","B. Nitrogen","C. Greenhouse gases","D. Methane"]},
+                {question:"(Inferential) Why does the government promote this sector heavily?", correct:"B", choices:["A. To export energy","B. To meet growing power demands","C. To shut down all other sources","D. To attract tourists"]},
+                {question:"What region is known for its geothermal power facilities? (Literal)", correct:"D", choices:["A. Visayas","B. Mindanao","C. Ilocos","D. Bicol"]}
+            ]
+        },
+        "10": { 
+            text: `Micro-finance initiatives have become an indispensable tool for poverty alleviation in rural Filipino communities, where access to traditional banking services is often limited. These programs provide small loans and financial literacy training, primarily empowering women to start small businesses. The impact extends beyond mere income generation; it fosters a sense of financial inclusion and self-reliance, shifting economic control back to the grassroots level. Unlike conventional loans, micro-finance often relies on social collateral—group repayment guarantees—ensuring higher repayment rates and community cohesion. This method is effective because of the strong social bonds. Micro-finance institutions (MFIs) operate globally but have a deep presence in Southeast Asia. Their main goal is to reach the unbanked population. The repayment schedule is usually tailored to the borrower's income cycle, such as harvest or market days. (Total Words: 177)`,
+            wordCount: 177, 
+            questions:[
+                {question:"What is the main purpose of micro-finance initiatives? (Literal)", correct:"A", choices:["A. Poverty alleviation in rural communities","B. Funding large corporate projects","C. Buying luxury goods","D. Developing high-tech gadgets"]},
+                {question:"What type of collateral do micro-finance loans often rely on? (Literal)", correct:"D", choices:["A. Cars and houses","B. Jewelry","C. Land titles","D. Social collateral (group guarantees)"]},
+                {question:"The word 'indispensable' means: (Vocabulary)", correct:"B", choices:["A. Optional or unnecessary","B. Absolutely necessary or essential","C. Very expensive","D. Easily replaced"]},
+                {question:"(Inferential) Why are women often the primary focus of these programs?", correct:"C", choices:["A. They are the only ones who can repay loans.","B. They are often better at business than men.","C. Empowering women often leads to better household financial management and community development.","D. Men are not allowed to join."]},
+                {question:"What two main things do these programs provide? (Literal)", correct:"B", choices:["A. Large homes and cars","B. Small loans and financial literacy training","C. Job applications and school tuition","D. Food and water"]},
+                {question:"Access to what services is often limited in rural communities? (Literal)", correct:"A", choices:["A. Traditional banking services","B. Internet access","C. Public transport","D. Electricity"]},
+                {question:"The impact of micro-finance extends beyond what? (Literal)", correct:"C", choices:["A. Repaying loans","B. Attending training","C. Mere income generation","D. Starting businesses"]},
+                {question:"(Inferential) Why is social collateral effective?", correct:"D", choices:["A. It requires no effort","B. The loans are larger","C. There is no interest","D. It ensures higher repayment rates and community cohesion"]},
+                {question:"What term is used for organizations that provide micro-finance? (Literal)", correct:"A", choices:["A. MFIs (Micro-finance Institutions)","B. Banks","C. Corporations","D. NGOs (Non-Governmental Organizations)"]},
+                {question:"How is the repayment schedule often tailored? (Literal)", correct:"B", choices:["A. Monthly fixed payments","B. To the borrower's income cycle (e.g., harvest)","C. Daily payments","D. Quarterly payments"]}
+            ]
+        }
+    };
+    
+    // --- UTILITY FUNCTIONS ---
+    function generateUniqueId(passcode) {
+        return `${passcode}-${Date.now().toString(36)}`;
+    }
+
+    function saveLearnerData() {
+        const existingIndex = studentsData.findIndex(s => s.passcode === currentLearnerData.passcode);
+        if (existingIndex > -1) {
+            studentsData[existingIndex] = { ...currentLearnerData };
+        } else {
+            studentsData.push({ ...currentLearnerData });
+        }
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(studentsData));
+    }
+    
+    // --- TIMER FUNCTIONS ---
+    function startReadingTimer() {
+        if (timerInterval) clearInterval(timerInterval); 
+        
+        timeLeft = ORAL_READING_DURATION;
+        document.getElementById('timerDisplay').textContent = formatTime(timeLeft);
+        document.getElementById('startButton').disabled = true;
+        document.getElementById('stopButton').disabled = false;
+        document.getElementById('calculateFluencyBtn').disabled = true; 
+        document.getElementById('readingTime').value = '';
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('timerDisplay').textContent = formatTime(timeLeft);
+
+            if (timeLeft <= 0) {
+                stopReadingTimer();
+                alert(`Time's up! The reading duration has reached the ${ORAL_READING_DURATION / 60}-minute limit. The recorded time is ${ORAL_READING_DURATION} seconds.`);
+                document.getElementById('readingTime').value = ORAL_READING_DURATION;
+            }
+        }, 1000);
+    }
+    
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+
+    function stopReadingTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        
+        timeTaken = ORAL_READING_DURATION - timeLeft;
+        
+        document.getElementById('startButton').disabled = false;
+        document.getElementById('stopButton').disabled = true;
+        document.getElementById('calculateFluencyBtn').disabled = false; 
+
+        document.getElementById('readingTime').disabled = false; // Enable manual override
+        document.getElementById('readingTime').value = timeTaken;
+    }
+
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+        studentsData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+        document.getElementById('timerDuration').textContent = ORAL_READING_DURATION;
+        document.getElementById('timerDisplay').textContent = formatTime(ORAL_READING_DURATION);
+        document.getElementById('samplePasscode').textContent = STUDENT_PASSCODES[0]; 
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get('role');
+        const key = urlParams.get('key');
+
+        if (role === 'teacher' && key === TEACHER_SECRET_KEY) {
+            initializeTeacherDashboard();
+        } else {
+            initializeLearnerAssessment();
+        }
+    };
+
+
+    // ===== TEACHER MAINFRAME FUNCTIONS =====
+    function initializeTeacherDashboard() {
+        document.getElementById('learnerAssessmentView').classList.add('hidden');
+        document.getElementById('teacherDashboardView').classList.remove('hidden');
+        document.getElementById('mainHeader').textContent = 'Phil-IRI JHS Teacher Mainframe';
+        document.getElementById('subHeader').textContent = 'Secure Access Granted';
+        renderTeacherDashboard();
+    }
+
+    function clearAllData() {
+        if (confirm("WARNING: This will permanently delete ALL recorded learner data in this browser's storage. Are you sure?")) {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            studentsData = [];
+            renderTeacherDashboard();
+            alert("All learner data has been cleared.");
+        }
+    }
+
+    function renderTeacherDashboard() {
+        const tbody = document.getElementById('dashboard-table').querySelector('tbody');
+        const noDataMessage = document.getElementById('no-data-message');
+        const summaryMetrics = document.getElementById('summary-metrics');
+        
+        studentsData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || [];
+
+        tbody.innerHTML = '';
+        summaryMetrics.innerHTML = '';
+        
+        if (studentsData.length === 0) {
+            noDataMessage.style.display = 'block';
+            return;
+        }
+        noDataMessage.style.display = 'none';
+
+        let independent = 0;
+        let instructional = 0;
+        let frustration = 0;
+        let gradeReady = 0;
+        let writingPass = 0;
+
+        studentsData.forEach((student, index) => {
+            const levelString = student.finalReadingLevel || 'N/A';
+            const level = levelString.split('(')[0].trim();
+            const levelClass = `level-${level.toLowerCase().replace('/', '').replace(' ', '').trim()}`;
+            
+            if (level.includes('Grade-Ready')) { gradeReady++; }
+            else if (level.includes('Independent')) { independent++; }
+            else if (level.includes('Instructional')) { instructional++; }
+            else if (level.includes('Frustration')) { frustration++; }
+
+            if (student.writingScore !== null && student.writingScore >= WRITING_PASS_THRESHOLD) { writingPass++; }
+            
+            const row = tbody.insertRow();
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${student.name}</td>
+                <td>${student.currentGrade}</td>
+                <td>${student.gstScore === null ? 'N/A' : student.gstScore + ' / 40'}</td>
+                <td>${student.writingScore === null ? 'N/A' : student.writingScore + ' / 40' + (student.writingScore >= WRITING_PASS_THRESHOLD ? ' (Pass)' : ' (Fail)')}</td>
+                <td class="${levelClass}">${levelString}</td>
+                <td>${student.wpm || 'N/A'}</td>
+                <td>${student.passageGrade || 'N/A'}</td>
+                <td>${student.skillGap || 'N/A'}</td>
+            `;
+        });
+
+        const totalAssessed = studentsData.length;
+        
+        summaryMetrics.innerHTML = `
+            <div>Total Learners Assessed: <span style="color:var(--text-color);">${totalAssessed}</span></div>
+            <div>GST Passers (Grade-Ready): <span class="level-gradeready" style="padding: 5px; border-radius: 4px;">${gradeReady}</span></div>
+            <div>Writing Passers: <span class="level-gradeready" style="padding: 5px; border-radius: 4px;">${writingPass}</span></div>
+            <div>Independent: <span class="level-independent" style="padding: 5px; border-radius: 4px;">${independent}</span></div>
+            <div>Instructional: <span class="level-instructional" style="padding: 5px; border-radius: 4px;">${instructional}</span></div>
+            <div>Frustration: <span class="level-frustration" style="padding: 5px; border-radius: 4px;">${frustration}</span></div>
+        `;
+    }
+
+    // ===== LEARNER ASSESSMENT FUNCTIONS (FRONT-END) =====
+
+    function initializeLearnerAssessment() {
+        document.getElementById('teacherDashboardView').classList.add('hidden');
+        document.getElementById('learnerAssessmentView').classList.remove('hidden');
+        document.getElementById('mainHeader').textContent = 'Phil-IRI JHS Learner Assessment';
+        document.getElementById('subHeader').textContent = 'Please login to begin.';
+        
+        // Reset and show initial screen
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('studentInfoScreen').classList.add('hidden'); 
+        document.getElementById('step0').classList.add('hidden');
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.add('hidden');
+        document.getElementById('step4').classList.add('hidden');
+        document.getElementById('step5').classList.add('hidden');
+    }
+
+    function learnerLogin() {
+        const passcode = document.getElementById('learnerPasscode').value.trim();
+
+        if (STUDENT_PASSCODES.includes(passcode)) {
+            let existingData = studentsData.find(s => s.passcode === passcode);
+
+            if (!existingData) {
+                // First-time use: initialize and proceed to info input
+                currentLearnerData = { 
+                    id: generateUniqueId(passcode),
+                    passcode: passcode,
+                    name: null, 
+                    currentGrade: null, 
+                    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                    gstScore: null, finalReadingLevel: null, passageGrade: null, 
+                    wpm: null, skillGap: null, writingScore: null, assessmentStarted: true,
+                    totalErrors: null, errorsBreakdown: {}, readingTime: null,
+                    wrPercentage: null, compPercentage: null, wrLevel: null, compLevel: null
+                };
+                
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('studentInfoScreen').classList.remove('hidden'); 
+                document.getElementById('subHeader').textContent = `Passcode accepted. Please enter your details.`;
+            } else {
+                // Existing data: resume assessment
+                currentLearnerData = existingData;
+                alert(`Welcome back, ${currentLearnerData.name}. Continuing the assessment for Grade ${currentLearnerData.currentGrade}.`);
+                
+                document.getElementById('loginScreen').classList.add('hidden');
+                loadGSTScreen(); 
+            }
+            window.scrollTo(0, 0);
+
+        } else {
+            alert("Invalid passcode. Please check your code (e.g., 2026-001) and try again.");
+            document.getElementById('learnerPasscode').value = ''; 
+        }
+    }
+
+    function submitStudentInfo() {
+        const name = document.getElementById('studentNameInput').value.trim();
+        const grade = document.getElementById('studentGradeInput').value;
+
+        if (!name || !grade) {
+            alert("Please enter your full name and select your current grade level before proceeding.");
+            return;
+        }
+
+        currentLearnerData.name = name;
+        currentLearnerData.currentGrade = grade;
+        saveLearnerData();
+
+        document.getElementById('studentInfoScreen').classList.add('hidden');
+        loadGSTScreen();
+    }
+    
+    function loadGSTScreen() {
+        document.getElementById('step0').classList.remove('hidden');
+        document.getElementById('displayStudentName').textContent = currentLearnerData.name;
+        document.getElementById('displayStudentGrade').textContent = currentLearnerData.currentGrade;
+        document.getElementById('subHeader').textContent = `Welcome, ${currentLearnerData.name}. Start the 40-item screening test.`;
+        loadGSTQuestions();
+        window.scrollTo(0, 0);
+    }
+
+
+    function loadGSTQuestions() {
+        const container = document.getElementById('gstQuestionsContainer');
+        container.innerHTML = '';
+        gstQuestions.forEach((q, i) => {
+            let li = document.createElement('li');
+            if (i > 0 && i % 10 === 0) { li.style.marginTop = '30px'; li.style.borderTop = '2px dashed #ccc'; li.style.paddingTop = '20px'; }
+            li.innerHTML = `<strong>${i + 1}. ${q.question}</strong><br>`;
+            q.choices.forEach(c => {
+                const choiceLetter = c.charAt(0);
+                li.innerHTML += `<label><input type="radio" name="gstq${i}" value="${choiceLetter}"> ${c}</label>`;
+            });
+            container.appendChild(li);
+        });
+    }
+
+    function getStartingPassageGrade(currentGrade, gstScore) {
+        const gradeNum = parseInt(currentGrade);
+        
+        if (gstScore >= GST_PASS_THRESHOLD) {
+            return { grade: gradeNum, message: "GST Passed. Learner is Grade-Ready. Proceeding to Writing Assessment." };
+        }
+        
+        let startGrade = gradeNum;
+
+        // Simplified Phil-IRI logic for JHS:
+        if (gstScore >= 20) { 
+            // Scores 20-27: Start 2 grades below current grade, minimum Grade 4.
+            startGrade = Math.max(4, gradeNum - 2); 
+        } else if (gstScore >= 10) { 
+            // Scores 10-19: Start 4 grades below current grade, minimum Grade 4.
+            startGrade = Math.max(4, gradeNum - 4); 
+        } else { 
+             // Scores below 10: Start at the lowest provided passage level (Grade 4).
+             startGrade = 4;
+        }
+
+        let finalGrade = String(startGrade);
+        
+        // Map the calculated start grade to one of the available passages (4, 7, 10)
+        if (finalGrade === "5" || finalGrade === "6" || finalGrade === "7") finalGrade = "7";
+        else if (finalGrade === "8" || finalGrade === "9" || finalGrade === "10") finalGrade = "10";
+        else if (finalGrade < "4") finalGrade = "4"; 
+        
+        return { grade: finalGrade, message: `GST Score is low (${gstScore}/40). Starting Individual Assessment at Passage Grade ${finalGrade}.` };
+    }
+
+    function submitGST() {
+        let score = 0;
+        let allAnswered = true;
+        for (let i = 0; i < gstQuestions.length; i++) {
+            const selected = document.querySelector(`input[name="gstq${i}"]:checked`);
+            if (!selected) {
+                allAnswered = false;
+                break;
+            }
+            if (selected.value === gstQuestions[i].correct) {
+                score++;
+            }
+        }
+
+        if (!allAnswered) {
+            alert("Please answer all 40 questions before submitting the Group Screening Test.");
+            return;
+        }
+
+        currentLearnerData.gstScore = score;
+        saveLearnerData();
+
+        document.getElementById('step0').classList.add('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+
+        const resultOutput = document.getElementById('gstResultOutput');
+        const passageResult = getStartingPassageGrade(currentLearnerData.currentGrade, score);
+        
+        let status;
+        let nextStepText;
+        let btnAction;
+        let btnBg;
+
+        if (score >= GST_PASS_THRESHOLD) {
+            status = `<span class="report-highlight level-gradeready">GRADE-READY: ${score} / 40</span>`;
+            nextStepText = "The learner is considered Grade-Ready in Reading. Proceed to Writing Skills Assessment.";
+            btnAction = "loadWritingAssessment()";
+            btnBg = 'var(--primary-color)';
+            currentLearnerData.finalReadingLevel = `Grade-Ready (GST Passed)`;
+            currentLearnerData.passageGrade = 'N/A';
+            currentLearnerData.wpm = 'N/A';
+        } else {
+            status = `<span class="report-highlight level-frustration">FOR INDIVIDUAL ASSESSMENT: ${score} / 40</span>`;
+            nextStepText = passageResult.message + " Proceed to Oral Reading Assessment.";
+            btnAction = "loadOralAssessment()";
+            btnBg = 'var(--warning-color)';
+        }
+
+        resultOutput.innerHTML = `
+            <p><strong>Raw Score:</strong> ${status}</p>
+            <p><strong>Recommendation:</strong> ${nextStepText}</p>
+            <p><strong>Starting Individual Passage:</strong> Grade ${passageResult.grade || 'N/A'}</p>
+        `;
+
+        const proceedBtn = document.getElementById('proceedToOralBtn');
+        proceedBtn.textContent = score >= GST_PASS_THRESHOLD ? "Go to Writing Assessment" : `Start Oral Reading Assessment (Grade ${passageResult.grade})`;
+        proceedBtn.setAttribute('onclick', btnAction);
+        proceedBtn.style.backgroundColor = btnBg;
+        
+        passageGrade = passageResult.grade;
+        
+        window.scrollTo(0, 0);
+    }
+
+    function loadOralAssessment() {
+        if (currentLearnerData.gstScore >= GST_PASS_THRESHOLD) {
+            // Should not be called for Grade-Ready, but as a safeguard:
+            alert("This student is Grade-Ready. Proceed directly to Writing Assessment.");
+            loadWritingAssessment();
+            return;
+        }
+
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
+        
+        const passageData = passages[passageGrade];
+        if (!passageData) {
+            alert(`Error: Passage for Grade ${passageGrade} not found.`);
+            return;
+        }
+
+        totalWords = passageData.wordCount;
+        currentLearnerData.passageGrade = passageGrade;
+
+        document.getElementById('passageGradeDisplay').textContent = `Grade ${passageGrade}`;
+        document.getElementById('wordCountDisplay').textContent = `Total Words: ${totalWords}`;
+        document.getElementById('oralPassage').textContent = 'Click "Display Passage & Start Assessment" to show the text.';
+        document.getElementById('oralPassage').classList.add('hidden');
+        
+        document.getElementById('startReadingBtn').classList.remove('hidden');
+        document.getElementById('readingTimerSection').classList.add('hidden'); 
+        document.getElementById('fluencyCheck').classList.add('hidden');
+        document.getElementById('accuracyCheck').classList.add('hidden');
+        document.getElementById('wpmResult').textContent = '';
+        document.getElementById('readingTime').disabled = true;
+        document.getElementById('calculateFluencyBtn').disabled = true;
+
+        if (timerInterval) clearInterval(timerInterval);
+        document.getElementById('timerDisplay').textContent = formatTime(ORAL_READING_DURATION);
+        document.getElementById('startButton').disabled = false;
+        document.getElementById('stopButton').disabled = true;
+
+        window.scrollTo(0, 0);
+    }
+    
+    function startReading() {
+        const passageData = passages[passageGrade];
+        document.getElementById('oralPassage').textContent = passageData.text;
+        document.getElementById('oralPassage').classList.remove('hidden');
+        document.getElementById('startReadingBtn').classList.add('hidden');
+        document.getElementById('readingTimerSection').classList.remove('hidden'); 
+        document.getElementById('fluencyCheck').classList.remove('hidden'); 
+        document.getElementById('oralInstructionNote').innerHTML = '<strong>Assessment in Progress:</strong> Start the timer, record errors, and press stop when finished.';
+        
+        const errorContainer = document.getElementById('errorInputs');
+        errorContainer.innerHTML = '';
+        errorTypes.forEach(type => {
+            currentErrors[type] = 0; 
+            const inputId = type.replace(/[^a-zA-Z]/g, '').replace('>', '');
+            errorContainer.innerHTML += `
+                <div>
+                    <label for="${inputId}" style="font-size:0.9em;">${type}:</label>
+                    <input type="number" id="${inputId}" min="0" value="0" style="width: 80px; margin-right: 0;" required>
+                </div>
+            `;
+        });
+        document.getElementById('accuracyCheck').classList.remove('hidden');
+    }
+
+    function calculateFluency() {
+        const readingTime = parseFloat(document.getElementById('readingTime').value);
+
+        if (isNaN(readingTime) || readingTime <= 0) {
+            alert("Please ensure the timer has been stopped and a valid reading time is entered.");
+            return;
+        }
+
+        const wpm = Math.round((totalWords / readingTime) * 60);
+        currentLearnerData.wpm = wpm;
+        currentLearnerData.readingTime = readingTime;
+
+        document.getElementById('wpmResult').textContent = `Calculated WPM: ${wpm} (Words Per Minute)`;
+        document.getElementById('calculateFluencyBtn').disabled = true;
+        alert(`Fluency Calculated: ${wpm} WPM. Proceed to Step 2B (Errors).`);
+    }
+
+    function submitOralErrors() {
+        if (!currentLearnerData.wpm) {
+            alert("Please stop the timer and calculate WPM (Step 2A) first.");
+            return;
+        }
+
+        let totalErrors = 0;
+        
+        errorTypes.forEach(type => {
+            const inputId = type.replace(/[^a-zA-Z]/g, '').replace('>', '');
+            const errors = parseInt(document.getElementById(inputId).value) || 0;
+            currentErrors[type] = errors;
+            
+            // Self-Corrections are NOT counted as errors in Phil-IRI WR score.
+            if (type !== "Self-Corrections") {
+                totalErrors += errors;
+            }
+        });
+
+        currentLearnerData.totalErrors = totalErrors;
+        currentLearnerData.errorsBreakdown = { ...currentErrors }; 
+
+        const wrPercentage = ((totalWords - totalErrors) / totalWords) * 100;
+        currentLearnerData.wrPercentage = Math.max(0, wrPercentage).toFixed(1); 
+
+        let wrLevel = 'N/A';
+        if (wrPercentage >= PHIL_IRI_LEVELS.Independent.wrMin) {
+            wrLevel = 'Independent';
+        } else if (wrPercentage >= PHIL_IRI_LEVELS.Instructional.wrMin) {
+            wrLevel = 'Instructional';
+        } else {
+            wrLevel = 'Frustration';
+        }
+        currentLearnerData.wrLevel = wrLevel;
+
+        document.getElementById('accuracyCheck').classList.add('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.remove('hidden');
+
+        // Load 10 comprehension questions
+        loadComprehensionQuestions(passages[passageGrade].questions);
+        window.scrollTo(0, 0);
+    }
+    
+    function loadComprehensionQuestions(questions) {
+        const container = document.getElementById('comprehensionQuestions');
+        container.innerHTML = '';
+        if (questions.length !== 10) {
+            container.innerHTML = `<p class="alert-info" style="color: var(--danger-color);">Error: Expected 10 comprehension questions, found ${questions.length}. Cannot proceed.</p>`;
+            return;
+        }
+
+        questions.forEach((q, i) => {
+            let li = document.createElement('li');
+            li.innerHTML = `<strong>${i + 1}. ${q.question}</strong><br>`;
+            q.choices.forEach(c => {
+                const choiceLetter = c.charAt(0);
+                li.innerHTML += `<label><input type="radio" name="compq${i}" value="${choiceLetter}"> ${c}</label>`;
+            });
+            container.appendChild(li);
+        });
+    }
+
+    function determineReadingLevel(wrLevel, compScore) {
+        let compLevel = 'N/A';
+        if (compScore >= PHIL_IRI_LEVELS.Independent.compMin) {
+            compLevel = 'Independent';
+        } else if (compScore >= PHIL_IRI_LEVELS.Instructional.compMin) {
+            compLevel = 'Instructional';
+        } else {
+            compLevel = 'Frustration';
+        }
+        currentLearnerData.compLevel = compLevel;
+
+        const levelsOrder = ['Independent', 'Instructional', 'Frustration'];
+        const wrIndex = levelsOrder.indexOf(wrLevel);
+        const compIndex = levelsOrder.indexOf(compLevel);
+        
+        // Final level is the lower of the two (higher index number = lower level)
+        let finalLevel = levelsOrder[Math.max(wrIndex, compIndex)]; 
+
+        let skillGap = 'N/A';
+        if (finalLevel === 'Frustration') {
+            if (wrLevel === 'Frustration' && compLevel === 'Frustration') {
+                skillGap = 'Severe Gap in Both Word Recognition and Comprehension';
+            } else if (wrLevel === 'Frustration') {
+                skillGap = 'Primary Gap in Word Recognition/Decoding';
+            } else {
+                skillGap = 'Primary Gap in Comprehension/Critical Thinking';
+            }
+        } else {
+            skillGap = 'Reading is within Instructional/Independent range';
+        }
+        currentLearnerData.skillGap = skillGap;
+
+        return { finalLevel, skillGap, wrLevel, compLevel };
+    }
+
+    function submitComprehension() {
+        const comprehensionQuestions = passages[passageGrade].questions;
+        let compScore = 0;
+        let allAnswered = true;
+        
+        for (let i = 0; i < comprehensionQuestions.length; i++) {
+            const selected = document.querySelector(`input[name="compq${i}"]:checked`);
+            if (!selected) {
+                allAnswered = false;
+                break;
+            }
+            if (selected.value === comprehensionQuestions[i].correct) {
+                compScore++;
+            }
+        }
+
+        if (!allAnswered) {
+            alert("Please answer all 10 comprehension questions before submitting.");
+            return;
+        }
+
+        const compPercentage = (compScore / comprehensionQuestions.length) * 100;
+        currentLearnerData.compScore = compScore;
+        currentLearnerData.compPercentage = compPercentage.toFixed(1);
+
+        const wrLevel = currentLearnerData.wrLevel; 
+        const levelResult = determineReadingLevel(wrLevel, compPercentage);
+
+        currentLearnerData.finalReadingLevel = `${levelResult.finalLevel} (G${currentLearnerData.passageGrade})`;
+
+        saveLearnerData(); 
+
+        document.getElementById('step3').classList.add('hidden');
+        loadWritingAssessment();
+        window.scrollTo(0, 0);
+    }
+    
+    function loadWritingAssessment() {
+        // Hide previous steps and show step 4
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.add('hidden');
+        document.getElementById('step4').classList.remove('hidden');
+
+        const container = document.getElementById('writingQuestionsContainer');
+        container.innerHTML = '';
+        writingQuestions.forEach((q, i) => {
+            let li = document.createElement('li');
+            if (i > 0 && i % 10 === 0) { li.style.marginTop = '30px'; li.style.borderTop = '2px dashed #ccc'; li.style.paddingTop = '20px'; }
+            li.innerHTML = `<strong>${i + 1}. ${q.question}</strong><br>`;
+            q.choices.forEach(c => {
+                const choiceLetter = c.charAt(0);
+                li.innerHTML += `<label><input type="radio" name="writingq${i}" value="${choiceLetter}"> ${c}</label>`;
+            });
+            container.appendChild(li);
+        });
+        window.scrollTo(0, 0);
+    }
+    
+    function submitWritingAssessment() {
+        let score = 0;
+        let allAnswered = true;
+        for (let i = 0; i < writingQuestions.length; i++) {
+            const selected = document.querySelector(`input[name="writingq${i}"]:checked`);
+            if (!selected) {
+                allAnswered = false;
+                break;
+            }
+            if (selected.value === writingQuestions[i].correct) {
+                score++;
+            }
+        }
+
+        if (!allAnswered) {
+            alert("Please answer all 40 questions in the Writing Assessment before finishing.");
+            return;
+        }
+
+        currentLearnerData.writingScore = score;
+        saveLearnerData();
+
+        document.getElementById('step4').classList.add('hidden');
+        showFinalSummary();
+        window.scrollTo(0, 0);
+    }
+
+    function generateDailyPlan(gapType, writingIntervention) {
+        let dailyActivities = {};
+        const readingGrade = currentLearnerData.passageGrade;
+        const writingStatus = currentLearnerData.writingScore >= WRITING_PASS_THRESHOLD ? 'N/A' : writingIntervention;
+        
+        // Define base activities based on the primary gap
+        if (gapType.includes('Word Recognition')) {
+            dailyActivities = {
+                'Monday': `**Phonics/Decoding Drill (15 mins):** Target high-frequency sight words (G${readingGrade} list) and common affixes/suffixes.`,
+                'Tuesday': `**Repeated Reading (20 mins):** Reread a short G${readingGrade} non-fiction passage 3 times, focusing on speed and accuracy.`,
+                'Wednesday': `**Fluency Practice (15 mins):** Use partner reading or choral reading with a G${readingGrade} text to model expressive reading.`,
+                'Thursday': `**Vocabulary Builder (15 mins):** Identify 5 new challenging words from the reading material and define them in context.`,
+                'Friday': `**Weekly Review (30 mins):** Reread all texts and conduct a self-assessment on reading speed/smoothness.`
+            };
+        } else if (gapType.includes('Comprehension')) {
+            dailyActivities = {
+                'Monday': `**Pre-Reading (15 mins):** Use K-W-L chart for a new G${readingGrade} expository text. Activate prior knowledge.`,
+                'Tuesday': `**Questioning Strategy (20 mins):** Read 2 paragraphs, stop, and generate 3 "thick" (inferential) questions about the text.`,
+                'Wednesday': `**Summarizing/Main Idea (15 mins):** Read a section and write a 2-3 sentence summary of the main idea and key details.`,
+                'Thursday': `**Graphic Organizer (20 mins):** Use a Venn diagram or timeline to process information from the reading material.`,
+                'Friday': `**Weekly Review (30 mins):** Answer 5 open-ended questions about the week's reading, requiring textual evidence.`
+            };
+        } else if (gapType.includes('Instructional')) {
+             dailyActivities = {
+                'Monday': `**Guided Reading (20 mins):** Read a G${readingGrade} passage with teacher/peer support, focusing on error correction and phrasing.`,
+                'Tuesday': `**Vocabulary & Context Clues (15 mins):** Practice using context clues to define unknown words encountered during reading.`,
+                'Wednesday': `**Silent Reading Comprehension (20 mins):** Read a passage silently, then orally retell the story or process.`,
+                'Thursday': `**Reading Fluency Check (15 mins):** Conduct a 1-minute timed reading to monitor WPM improvement.`,
+                'Friday': `**Review & Next Steps (30 mins):** Set reading goals for the following week and choose a new book/passage at the instructional level.`
+            };
+        } else {
+             dailyActivities = {
+                'Monday': `**Sustained Silent Reading (30 mins):** Encourage wide, independent reading of self-selected texts.`,
+                'Tuesday': `**Advanced Vocabulary (20 mins):** Focus on academic vocabulary and figurative language (metaphors, irony).`,
+                'Wednesday': `**Critical Analysis (20 mins):** Read an editorial/essay and identify the author's bias and purpose.`,
+                'Thursday': `**Genre Exploration (15 mins):** Read short excerpts from a new literary genre (e.g., historical fiction, satire).`,
+                'Friday': `**Writing/Application (30 mins):** Write a reflection or short summary based on the week's critical reading.`
+            };
+        }
+
+        // Integrate Writing Intervention if the writing score failed (regardless of reading gap)
+        if (writingStatus !== 'N/A') {
+            dailyActivities['Monday'] += `<br>**+ Writing Focus:** Review common sentence fragments and run-on sentences.`;
+            dailyActivities['Tuesday'] += `<br>**+ Writing Focus:** Practice subject-verb agreement with complex subjects (e.g., using "neither/nor").`;
+            dailyActivities['Wednesday'] += `<br>**+ Writing Focus:** Drill on proper use of commas, semicolons, and apostrophes.`;
+            dailyActivities['Thursday'] += `<br>**+ Writing Focus:** Re-write poorly constructed sentences using more formal language and strong transition words.`;
+            dailyActivities['Friday'] += `<br>**+ Writing Focus:** Write a short paragraph on a reading topic, applying the week's grammar and mechanics lessons.`;
+        }
+        
+        // This function returns the HTML for display, we'll need a similar structure for the TXT download
+        let html = '<table class="study-plan-table" style="width: 100%;">';
+        for (let w = 1; w <= 4; w++) {
+            html += `<thead><tr><th colspan="2" style="background-color: #ffd700; color: ${w % 2 === 0 ? 'var(--primary-color)' : '#000'};">WEEK ${w} FOCUS: ${gapType}</th></tr></thead>`;
+            html += '<tbody>';
+            for (const day in dailyActivities) {
+                const activity = dailyActivities[day].replace(/<br>\*\* \+ Writing Focus:/g, '<br>**+ Writing Focus:');
+                html += `<tr><td style="width: 20%; font-weight: bold; background-color: #f7f7f7;">${day}</td><td>${activity}</td></tr>`;
+            }
+            html += '</tbody>';
+        }
+        html += '</table>';
+        return html;
+    }
+
+    function showFinalSummary() {
+        document.getElementById('step5').classList.remove('hidden');
+        
+        // Populate Learner Profile Table
+        document.getElementById('finalLearnerName').textContent = currentLearnerData.name;
+        document.getElementById('finalLearnerPasscode').textContent = currentLearnerData.passcode;
+        document.getElementById('finalLearnerGrade').textContent = currentLearnerData.currentGrade;
+        document.getElementById('finalDate').textContent = currentLearnerData.date;
+        document.getElementById('passageLevelDisplay').textContent = currentLearnerData.passageGrade;
+
+
+        const finalLevelDisplay = document.getElementById('finalReadingLevelDisplay');
+        const skillGapDisplay = document.getElementById('skillGapDisplay');
+        const writingScoreDisplay = document.getElementById('writingScoreDisplay');
+        const studyPlanContent = document.getElementById('studyPlanContent');
+        
+        finalLevelDisplay.textContent = currentLearnerData.finalReadingLevel;
+        finalLevelDisplay.parentNode.className = 'card ' + (currentLearnerData.finalReadingLevel ? currentLearnerData.finalReadingLevel.toLowerCase().includes('grade-ready') ? 'level-gradeready-note' : currentLearnerData.finalReadingLevel.toLowerCase().includes('independent') ? 'level-independent' : currentLearnerData.finalReadingLevel.toLowerCase().includes('instructional') ? 'level-instructional' : 'level-frustration' : '');
+        
+        skillGapDisplay.textContent = currentLearnerData.skillGap || 'N/A';
+        
+        const writingStatus = currentLearnerData.writingScore >= WRITING_PASS_THRESHOLD ? 'Passed' : 'Needs Intensive Intervention';
+        writingScoreDisplay.innerHTML = `${currentLearnerData.writingScore} / 40 (${writingStatus})`;
+
+        document.getElementById('wrPercentageDisplay').textContent = currentLearnerData.wrPercentage ? `${currentLearnerData.wrPercentage}%` : 'N/A';
+        document.getElementById('compPercentageDisplay').textContent = currentLearnerData.compPercentage ? `${currentLearnerData.compPercentage}%` : 'N/A';
+
+        let planGapType;
+        if (currentLearnerData.finalReadingLevel.toLowerCase().includes('frustration')) {
+            planGapType = currentLearnerData.skillGap;
+        } else if (currentLearnerData.finalReadingLevel.toLowerCase().includes('instructional')) {
+            planGapType = 'Instructional Level Support';
+        } else {
+            planGapType = 'Independent/Grade-Ready Enhancement';
+        }
+        
+        const writingIntervention = currentLearnerData.writingScore < WRITING_PASS_THRESHOLD 
+            ? 'Intensive focus on mechanics, usage, and sentence structure.' 
+            : 'N/A';
+
+        studyPlanContent.innerHTML = generateDailyPlan(planGapType, writingIntervention);
+
+
+        const errorResultDiv = document.getElementById('detailedErrorResult');
+        const errorTableBody = document.getElementById('errorAnalysisTableBody');
+        
+        if (currentLearnerData.totalErrors !== null && currentLearnerData.passageGrade !== 'N/A') {
+            errorResultDiv.classList.remove('hidden');
+            errorTableBody.innerHTML = '';
+            
+            document.getElementById('totalWordsReadDisplay').textContent = currentLearnerData.passageGrade ? passages[currentLearnerData.passageGrade].wordCount : 0;
+            document.getElementById('totalErrorCountDisplay').textContent = currentLearnerData.totalErrors;
+
+            // Total non-SC errors for WR accuracy calculation
+            let totalNonSCErrors = 0;
+            errorTypes.filter(type => type !== "Self-Corrections").forEach(type => {
+                totalNonSCErrors += currentLearnerData.errorsBreakdown[type] || 0;
+            });
+            // Total Errors INCLUDING SC for analysis percentage
+            const totalErrorsForAnalysis = totalNonSCErrors + (currentLearnerData.errorsBreakdown["Self-Corrections"] || 0);
+
+            errorTypes.forEach(type => {
+                const count = currentLearnerData.errorsBreakdown[type] || 0;
+                let percentage = '0.0%';
+                if (totalErrorsForAnalysis > 0) {
+                     percentage = `${((count / totalErrorsForAnalysis) * 100).toFixed(1)}%`;
+                }
+
+                const row = errorTableBody.insertRow();
+                row.innerHTML = `
+                    <td>${type}</td>
+                    <td>${count}</td>
+                    <td>${percentage}</td>
+                `;
+            });
+
+        } else {
+            errorResultDiv.classList.add('hidden');
+        }
+    }
+    
+    // ===== DOWNLOAD FUNCTION =====
+
+    function getStudyPlanText(gapType, writingIntervention) {
+        let text = "";
+        const readingGrade = currentLearnerData.passageGrade;
+        const writingStatus = currentLearnerData.writingScore >= WRITING_PASS_THRESHOLD ? 'N/A' : writingIntervention;
+
+        let dailyActivities = {};
+        
+        if (gapType.includes('Word Recognition')) {
+            dailyActivities = {
+                'Monday': `**Phonics/Decoding Drill (15 mins):** Target high-frequency sight words (G${readingGrade} list) and common affixes/suffixes.`,
+                'Tuesday': `**Repeated Reading (20 mins):** Reread a short G${readingGrade} non-fiction passage 3 times, focusing on speed and accuracy.`,
+                'Wednesday': `**Fluency Practice (15 mins):** Use partner reading or choral reading with a G${readingGrade} text to model expressive reading.`,
+                'Thursday': `**Vocabulary Builder (15 mins):** Identify 5 new challenging words from the reading material and define them in context.`,
+                'Friday': `**Weekly Review (30 mins):** Reread all texts and conduct a self-assessment on reading speed/smoothness.`
+            };
+        } else if (gapType.includes('Comprehension')) {
+            dailyActivities = {
+                'Monday': `**Pre-Reading (15 mins):** Use K-W-L chart for a new G${readingGrade} expository text. Activate prior knowledge.`,
+                'Tuesday': `**Questioning Strategy (20 mins):** Read 2 paragraphs, stop, and generate 3 "thick" (inferential) questions about the text.`,
+                'Wednesday': `**Summarizing/Main Idea (15 mins):** Read a section and write a 2-3 sentence summary of the main idea and key details.`,
+                'Thursday': `**Graphic Organizer (20 mins):** Use a Venn diagram or timeline to process information from the reading material.`,
+                'Friday': `**Weekly Review (30 mins):** Answer 5 open-ended questions about the week's reading, requiring textual evidence.`
+            };
+        } else if (gapType.includes('Instructional')) {
+             dailyActivities = {
+                'Monday': `**Guided Reading (20 mins):** Read a G${readingGrade} passage with teacher/peer support, focusing on error correction and phrasing.`,
+                'Tuesday': `**Vocabulary & Context Clues (15 mins):** Practice using context clues to define unknown words encountered during reading.`,
+                'Wednesday': `**Silent Reading Comprehension (20 mins):** Read a passage silently, then orally retell the story or process.`,
+                'Thursday': `**Reading Fluency Check (15 mins):** Conduct a 1-minute timed reading to monitor WPM improvement.`,
+                'Friday': `**Review & Next Steps (30 mins):** Set reading goals for the following week and choose a new book/passage at the instructional level.`
+            };
+        } else {
+             dailyActivities = {
+                'Monday': `**Sustained Silent Reading (30 mins):** Encourage wide, independent reading of self-selected texts.`,
+                'Tuesday': `**Advanced Vocabulary (20 mins):** Focus on academic vocabulary and figurative language (metaphors, irony).`,
+                'Wednesday': `**Critical Analysis (20 mins):** Read an editorial/essay and identify the author's bias and purpose.`,
+                'Thursday': `**Genre Exploration (15 mins):** Read short excerpts from a new literary genre (e.g., historical fiction, satire).`,
+                'Friday': `**Writing/Application (30 mins):** Write a reflection or short summary based on the week's critical reading.`
+            };
+        }
+
+        for (let w = 1; w <= 4; w++) {
+            text += `\n\n### WEEK ${w} FOCUS: ${gapType}\n`;
+            text += '----------------------------------------------------------\n';
+            for (const day in dailyActivities) {
+                let activity = dailyActivities[day];
+                
+                // Add Writing Focus
+                if (writingStatus !== 'N/A') {
+                    let writingFocus;
+                    if (day === 'Monday') writingFocus = 'Review common sentence fragments and run-on sentences.';
+                    else if (day === 'Tuesday') writingFocus = 'Practice subject-verb agreement with complex subjects (e.g., using "neither/nor").';
+                    else if (day === 'Wednesday') writingFocus = 'Drill on proper use of commas, semicolons, and apostrophes.';
+                    else if (day === 'Thursday') writingFocus = 'Re-write poorly constructed sentences using more formal language and strong transition words.';
+                    else if (day === 'Friday') writingFocus = 'Write a short paragraph on a reading topic, applying the week\'s grammar and mechanics lessons.';
+                    
+                    activity += `\n - **+ Writing Focus:** ${writingFocus}`;
+                }
+
+                // Format for TXT
+                text += `* ${day}:\n`;
+                text += `  - ${activity.replace(/\*\*/g, '').replace(/\n/g, ' ')}\n`;
+            }
+        }
+        return text;
+    }
+
+    function downloadResults() {
+        if (!currentLearnerData.name) {
+            alert("No complete learner data found to download.");
+            return;
+        }
+
+        const data = currentLearnerData;
+
+        let totalNonSCErrors = 0;
+        errorTypes.filter(type => type !== "Self-Corrections").forEach(type => {
+            totalNonSCErrors += data.errorsBreakdown[type] || 0;
+        });
+        const totalErrorsForAnalysis = totalNonSCErrors + (data.errorsBreakdown["Self-Corrections"] || 0);
+
+        let errorAnalysisText = "N/A (Learner was Grade-Ready or data incomplete)";
+        if (data.passageGrade !== 'N/A' && data.totalErrors !== null) {
+            errorAnalysisText = `
+| Error Type | Count | Percentage of Total Errors |
+| :--- | :---: | :---: |
+${errorTypes.map(type => 
+    `| ${type} | ${data.errorsBreakdown[type] || 0} | ${totalErrorsForAnalysis > 0 ? ((data.errorsBreakdown[type] || 0) / totalErrorsForAnalysis * 100).toFixed(1) + '%' : '0.0%'} |`
+).join('\n')}`;
+        }
+        
+        let planGapType;
+        if (data.finalReadingLevel.toLowerCase().includes('frustration')) {
+            planGapType = data.skillGap;
+        } else if (data.finalReadingLevel.toLowerCase().includes('instructional')) {
+            planGapType = 'Instructional Level Support';
+        } else {
+            planGapType = 'Independent/Grade-Ready Enhancement';
+        }
+        
+        const writingIntervention = data.writingScore < WRITING_PASS_THRESHOLD 
+            ? 'Intensive focus on mechanics, usage, and sentence structure.' 
+            : 'N/A';
+
+        const studyPlanText = getStudyPlanText(planGapType, writingIntervention);
+
+        const content = `
+# Phil-IRI JHS Assessment Results and Intervention Plan
+---
+
+## 1. Learner Profile
+| Metric | Value |
+| :--- | :--- |
+| Learner Name | ${data.name} |
+| Passcode | ${data.passcode} |
+| Current Grade | Grade ${data.currentGrade} |
+| Date Assessed | ${data.date} |
+
+## 2. Overall Assessment Summary
+| Assessment Component | Raw Score | Percentage | Status/Level |
+| :--- | :--- | :--- | :--- |
+| **Group Screening Test (GST)** | ${data.gstScore} / 40 | ${(data.gstScore / 40 * 100).toFixed(1)}% | ${data.gstScore >= GST_PASS_THRESHOLD ? 'Passed (Grade-Ready)' : 'Failed (Needs Individual Assessment)'} |
+| **Writing Skills Test** | ${data.writingScore} / 40 | ${(data.writingScore / 40 * 100).toFixed(1)}% | ${data.writingScore >= WRITING_PASS_THRESHOLD ? 'Passed' : 'Needs Intensive Intervention'} |
+| **Word Recognition (WR)** | ${data.passageGrade !== 'N/A' ? data.totalErrors + ' Errors' : 'N/A'} | ${data.wrPercentage || 'N/A'}% | ${data.wrLevel || 'N/A'} |
+| **Comprehension (Comp)** | ${data.passageGrade !== 'N/A' ? data.compScore + ' / 10' : 'N/A'} | ${data.compPercentage || 'N/A'}% | ${data.compLevel || 'N/A'} |
+| **Reading Fluency** | ${data.wpm || 'N/A'} WPM | ${data.readingTime ? data.readingTime + ' seconds' : 'N/A'} | Passage G${data.passageGrade || 'N/A'} |
+
+## 3. Final Phil-IRI Placement
+* **Final Reading Level:** ${data.finalReadingLevel}
+* **Priority Skill Gap:** ${data.skillGap}
+
+## 4. Oral Reading Error Breakdown (If Applicable)
+Total Words Read: ${data.passageGrade ? passages[data.passageGrade].wordCount : 'N/A'}
+Total Non-SC Errors (Used for WR Score): ${data.totalErrors || 'N/A'}
+
+${errorAnalysisText}
+
+## 5. Suggested 4-Week Intervention Plan (Daily Focus)
+Tailored to: ${planGapType}
+${writingIntervention !== 'N/A' ? 'Includes Daily Writing Focus for Intensive Intervention.' : ''}
+
+${studyPlanText}
+`;
+        
+        // Create Blob and trigger download
+        const filename = `${data.passcode}_PhilIRI_Results_${data.name.replace(/ /g, '_')}.txt`;
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+</script>
+</body>
+</html>
